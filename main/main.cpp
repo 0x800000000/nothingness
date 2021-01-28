@@ -13,9 +13,8 @@ int main(int argc, char* argv[]) {
 
 	ls_engine->execute_script("resources/scripts/t.lua", [engine](lua_State& lua) {
 		luabridge::getGlobalNamespace(&lua)
-			.addFunction("", printMessage);
+			.addFunction("printMessage", printMessage);
 	});
-
 
 	delete ls_engine;
 	delete engine;
