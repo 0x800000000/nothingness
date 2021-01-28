@@ -1,0 +1,1 @@
+printMessage("hello from lua!")
