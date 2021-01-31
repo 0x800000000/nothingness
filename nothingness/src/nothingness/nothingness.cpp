@@ -1,5 +1,6 @@
 ﻿#include "nothingness.h"
 #include "..//logger/logger.h"
+#include <string.h>
 
 nothingness::Nothingness *nothingness::Nothingness::instance;
 

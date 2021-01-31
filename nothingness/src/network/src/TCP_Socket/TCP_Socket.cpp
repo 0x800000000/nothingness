@@ -136,7 +136,7 @@ void nothingness::network::TCP_Socket::_connect(const char* ip, uint16_t port, u
 #ifdef WIN32
 	if (connect(sock, (struct sockaddr*)&addr, sizeof(addr)) != 0) 
 #else
-	if (connect(sock, (SOCKADDR*)&addr, sizeof(addr)) < 0)
+	if (connect(sock, (struct sockaddr*)&addr, sizeof(addr)) < 0)
 #endif
 	{
 		nothingness::network::last_error = "failed connection to the server";
