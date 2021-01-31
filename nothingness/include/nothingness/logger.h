@@ -32,7 +32,7 @@ namespace nothingness {
 	template<typename T>
 	inline Logger& Logger::operator<<(T& data) {
 		buffer << data;
-		return &this;
+		return *this;
 	}
 }
 
