@@ -1,0 +1,32 @@
+{
+  "nothingness": {
+    "resource_directory": "resources/",
+
+    "resources": [
+
+      {
+        "name": "t",
+
+        "type": 1,
+        "file_name": "scripts/t.lua"
+      },
+
+      {
+        "name": "server_certificate",
+
+        "type": 2,
+        "file_name": "certs/server-cert.pem"
+      },
+
+      {
+        "name": "server_private_key",
+
+        "type": 3,
+        "file_name": "certs/server-key.pem"
+      }
+
+    ]
+  }
+
+
+}

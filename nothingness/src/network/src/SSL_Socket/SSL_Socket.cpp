@@ -47,21 +47,20 @@ void nothingness::network::SSL::SSL_Socket::_listen(const char* ip, uint16_t por
 			addr.sin_addr.s_addr = inet_addr(ip);
 			addr.sin_port = htons(port);
 		}
-												  break;
+		break;
 
 		case NOTHINGNESS_SOCKET_INPUT_DATA_USE_ANY_IP_PORT: {
 			addr.sin_family = AF_INET;
 			addr.sin_addr.s_addr = INADDR_ANY;
 			addr.sin_port = htons(port);
 		}
-													  break;
+		break;
 
 		case NOTHINGNESS_SOCKET_INPUT_DATA_USE_DOMAIN_PORT: {
 			struct hostent* host = gethostbyname(ip);
 
 			if (host == NULL) {
-				nothingness::network::last_error = "domain not found!";
-				nothingness::network::last_error_code = 1;
+				this->Throw(new nothingness::nothingness_exception("domain not found!"));
 				return;
 			}
 
@@ -69,17 +68,17 @@ void nothingness::network::SSL::SSL_Socket::_listen(const char* ip, uint16_t por
 			addr.sin_port = htons(port);
 			addr.sin_family = AF_INET;
 		}
-														  break;
+		break;
 
 		case NOTHINGNESS_SOCKET_INPUT_DATA_USE_DOMAIN: {
-			nothingness::network::last_error = "listen do not support \"NOTHINGNESS_SOCKET_INPUT_DATA_USE_DOMAIN\"";
-			nothingness::network::last_error_code = 51;
+			this->Throw(new nothingness::nothingness_exception("listen do not support \"NOTHINGNESS_SOCKET_INPUT_DATA_USE_DOMAIN\"!"));
+			return;
 		}
-												 break;
+		break;
 
 	default:
-		nothingness::network::last_error = "invalid input data!";
-		nothingness::network::last_error_code = 51;
+		this->Throw(new nothingness::nothingness_exception("invalid input data!"));
+		return;
 		break;
 	}
 
@@ -89,8 +88,8 @@ void nothingness::network::SSL::SSL_Socket::_listen(const char* ip, uint16_t por
 	if (bind(sock, (struct sockaddr*)&addr, sizeof(addr)) < 0)
 #endif
 	{
-		nothingness::network::last_error = "cannot bind socket to the address!";
-		nothingness::network::last_error_code = 51;
+		this->Throw(new nothingness::nothingness_exception("cannot bind socket to the address!"));
+		return;
 	}
 
 	listen(sock, SOMAXCONN);
@@ -117,8 +116,8 @@ void nothingness::network::SSL::SSL_Socket::_connect(const char* ip, uint16_t po
 		struct hostent* host = gethostbyname(ip);
 
 		if (host == NULL) {
-			nothingness::network::last_error = "domain not found!";
-			nothingness::network::last_error_code = 2;
+			this->Throw(new nothingness::nothingness_exception("domain not found!"));
+			return;
 			return;
 		}
 
@@ -128,14 +127,14 @@ void nothingness::network::SSL::SSL_Socket::_connect(const char* ip, uint16_t po
 	}
 
 	case NOTHINGNESS_SOCKET_INPUT_DATA_USE_DOMAIN: {
-		nothingness::network::last_error = "comming soon!";
-		nothingness::network::last_error_code = 2;
+		this->Throw(new nothingness::nothingness_exception("connect do not support \"NOTHINGNESS_SOCKET_INPUT_DATA_USE_DOMAIN\"!"));
+		return;
 	}
 												 break;
 
 	default:
-		nothingness::network::last_error = "invalid input data!";
-		nothingness::network::last_error_code = 2;
+		this->Throw(new nothingness::nothingness_exception("invalid input data!"));
+		return;
 		break;
 	}
 	
@@ -145,8 +144,8 @@ void nothingness::network::SSL::SSL_Socket::_connect(const char* ip, uint16_t po
 	if (bind(sock, (struct sockaddr*)&addr, sizeof(addr)) < 0)
 #endif
 	{
-		nothingness::network::last_error = "cannot bind socket to the address!";
-		nothingness::network::last_error_code = 2;
+		this->Throw(new nothingness::nothingness_exception("cannot bind socket to the address!"));
+		return;
 	}
 
 #ifdef WIN32
@@ -155,30 +154,30 @@ void nothingness::network::SSL::SSL_Socket::_connect(const char* ip, uint16_t po
 	if (connect(sock, (SOCKADDR*)&addr, sizeof(addr)) < 0)
 #endif
 	{
-		nothingness::network::last_error = "failed connection to the server";
-		nothingness::network::last_error_code = 2;
+		this->Throw(new nothingness::nothingness_exception("failed connection to the server!"));
+		return;
 	}
 
 	ssl = wolfSSL_new(ctx->getWolfSSLContext());
 	
 	if (ssl == NULL) {
-		nothingness::network::last_error = "failed to create WOLFSSL object!";
-		nothingness::network::last_error_code = 51;
+		this->Throw(new nothingness::nothingness_exception("failed to create WOLFSSL object!"));
+		return;
 	}
 
 	int ret;
 	ret = wolfSSL_set_fd(ssl, sock);
 
 	if (ret != WOLFSSL_SUCCESS) {
-		nothingness::network::last_error = "Failed to set the file descriptor!";
-		nothingness::network::last_error_code = 51;
+		this->Throw(new nothingness::nothingness_exception("failed to create WOLFSSL object!"));
+		return;
 	}
 
 	ret = wolfSSL_connect(ssl);
 
 	if (ret != SSL_SUCCESS) {
-		nothingness::network::last_error = "failed to connect to wolfSSL!";
-		nothingness::network::last_error_code = 51;
+		this->Throw(new nothingness::nothingness_exception("failed connect to the server!(wolfssl)"));
+		return;
 	}
 }
 
@@ -200,15 +199,16 @@ nothingness::network::Socket* nothingness::network::SSL::SSL_Socket::_accept(){
 	if (tmp_sock < 0)
 #endif 
 	{
-		nothingness::network::last_error = "failed to accept the connection!";
-		nothingness::network::last_error_code = 51;
+		this->Throw(new nothingness::network::SSL::SSL_Socket_accept_exception("failed to accept connection!", SSL_Socket_accept_exception::type::error));
+		close(tmp_sock);
 		return nullptr;
 	}
 
 	WOLFSSL* tmp_ssl = wolfSSL_new(ctx->getWolfSSLContext());
 	if (tmp_ssl == NULL) {
-		nothingness::network::last_error = "failed to create WOLFSSL object!";
-		nothingness::network::last_error_code = 513;
+		this->Throw(new nothingness::network::SSL::SSL_Socket_accept_exception("failed to create WOLFSSL object!", SSL_Socket_accept_exception::type::error));
+		wolfSSL_free(tmp_ssl);
+		close(tmp_sock);
 		return nullptr;
 	}
 
@@ -219,14 +219,17 @@ nothingness::network::Socket* nothingness::network::SSL::SSL_Socket::_accept(){
 	if (ret != SSL_SUCCESS) {
 		int error = wolfSSL_get_error(tmp_ssl, ret);
 
-		nothingness::network::last_error = "wolfSSL_accept error = ";
-		nothingness::network::last_error += std::to_string(error);
+		std::string str_error = "wolfSSL_accept error = ";
+		str_error += std::to_string(error);
 		char buffer[80];
 
 		wolfSSL_ERR_error_string(error, buffer);
-		nothingness::network::last_error += buffer;
-		nothingness::network::last_error_code = error;
-		return new nothingness::network::SSL::SSL_Socket(ctx, tmp_ssl, tmp_sock);;
+		str_error += buffer;
+		str_error = error;
+
+		this->Throw(new nothingness::network::SSL::SSL_Socket_accept_exception(str_error.c_str(), SSL_Socket_accept_exception::type::warning));
+
+		return new nothingness::network::SSL::SSL_Socket(ctx, tmp_ssl, tmp_sock);
 	} 
 
 	return new nothingness::network::SSL::SSL_Socket(ctx, tmp_ssl, tmp_sock);
@@ -236,10 +239,11 @@ int nothingness::network::SSL::SSL_Socket::write(const char* data, int len){
 	int result;
 
 	result = wolfSSL_write(ssl, data, len);
+	
 	if (result != len) {
-		nothingness::network::last_error = "failed to write!";
-		nothingness::network::last_error_code = 51;
+		this->Throw(new nothingness::nothingness_exception("failed to write!"));
 	}
+
 	return result;
 }
 
@@ -249,8 +253,7 @@ int nothingness::network::SSL::SSL_Socket::read(char* data, int len){
 	result = wolfSSL_read(ssl, data, len);
 	
 	if (result < 0) {
-		nothingness::network::last_error = "failed to read!";
-		nothingness::network::last_error_code = 51;
+		this->Throw(new nothingness::nothingness_exception("failed to read!"));
 	}
 
 	return result;
@@ -264,8 +267,7 @@ void nothingness::network::SSL::SSL_Socket::create_socket() {
 	if (sock < 0)
 #endif 
 	{
-		nothingness::network::last_error = "cannot initialize socket!";
-		nothingness::network::last_error_code = 51;
+		this->Throw(new nothingness::nothingness_exception("cannot initialize socket!"));
 	}
 }
 
@@ -276,4 +278,15 @@ void nothingness::network::SSL::SSL_Socket::_close(){
 
 nothingness::network::SSL::SSL_Socket::~SSL_Socket(){
 	
+}
+
+nothingness::network::SSL::SSL_Socket_accept_exception::SSL_Socket_accept_exception(const char* msg, type type) 
+	: nothingness::nothingness_exception(msg),
+	my_type(type)
+{
+
+}
+
+nothingness::network::SSL::SSL_Socket_accept_exception::type nothingness::network::SSL::SSL_Socket_accept_exception::getType(){
+	return my_type;
 }

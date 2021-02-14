@@ -37,6 +37,22 @@ namespace nothingness {
 				~SSL_Socket();
 
 			};
+
+			class SSL_Socket_accept_exception : public nothingness::nothingness_exception{
+			public:
+				enum type {
+					error = 1,
+					warning = 2
+				};
+			
+			private:
+				type my_type;
+
+			public:
+				SSL_Socket_accept_exception(const char* msg, type type);
+
+				type getType();
+			};
 		}
 	}
 }

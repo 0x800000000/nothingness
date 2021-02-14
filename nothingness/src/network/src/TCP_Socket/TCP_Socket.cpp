@@ -44,8 +44,7 @@ void nothingness::network::TCP_Socket::_listen(const char* ip, uint16_t port, ui
 			struct hostent* host = gethostbyname(ip);
 
 			if (host == NULL) {
-				nothingness::network::last_error = "domain not found!";
-				nothingness::network::last_error_code = 1;
+				this->Throw(new nothingness::nothingness_exception("domain not found!"));
 				return;
 			}
 
@@ -55,14 +54,14 @@ void nothingness::network::TCP_Socket::_listen(const char* ip, uint16_t port, ui
 		}
 
 		case NOTHINGNESS_SOCKET_INPUT_DATA_USE_DOMAIN: {
-			nothingness::network::last_error = "listen do not support \"NOTHINGNESS_SOCKET_INPUT_DATA_USE_DOMAIN\"";
-			nothingness::network::last_error_code = 1;
+			this->Throw(new nothingness::nothingness_exception("listen do not support \"NOTHINGNESS_SOCKET_INPUT_DATA_USE_DOMAIN\"!"));
+			return;
 		}
 		break;
 
 	default:
-		nothingness::network::last_error = "invalid input data!";
-		nothingness::network::last_error_code = 1;
+		this->Throw(new nothingness::nothingness_exception("invalid input data!"));
+		return;
 		break;
 	}
 
@@ -72,8 +71,8 @@ void nothingness::network::TCP_Socket::_listen(const char* ip, uint16_t port, ui
 	if (bind(sock, (struct sockaddr*)&addr, sizeof(addr)) < 0)
 #endif
 	{
-		nothingness::network::last_error = "cannot bind socket to the address!";
-		nothingness::network::last_error_code = 1;
+		this->Throw(new nothingness::nothingness_exception("cannot bind socket to the address!"));
+		return;
 	}
 
 	listen(sock, SOMAXCONN);
@@ -101,8 +100,7 @@ void nothingness::network::TCP_Socket::_connect(const char* ip, uint16_t port, u
 		struct hostent* host = gethostbyname(ip);
 
 		if (host == NULL) {
-			nothingness::network::last_error = "domain not found!";
-			nothingness::network::last_error_code = 2;
+			this->Throw(new nothingness::nothingness_exception("domain not found!"));
 			return;
 		}
 
@@ -112,14 +110,14 @@ void nothingness::network::TCP_Socket::_connect(const char* ip, uint16_t port, u
 	}
 
 	case NOTHINGNESS_SOCKET_INPUT_DATA_USE_DOMAIN: {
-		nothingness::network::last_error = "comming soon!";
-		nothingness::network::last_error_code = 2;
+		this->Throw(new nothingness::nothingness_exception("connect do not support \"NOTHINGNESS_SOCKET_INPUT_DATA_USE_DOMAIN\"!"));
+		return;
 	}
 	break;
 
 	default:
-		nothingness::network::last_error = "invalid input data!";
-		nothingness::network::last_error_code = 2;
+		this->Throw(new nothingness::nothingness_exception("invalid input data!"));
+		return;
 		break;
 	}
 
@@ -129,8 +127,8 @@ void nothingness::network::TCP_Socket::_connect(const char* ip, uint16_t port, u
 	if (bind(sock, (struct sockaddr*)&addr, sizeof(addr)) < 0)
 #endif
 	{
-		nothingness::network::last_error = "cannot bind socket to the address!";
-		nothingness::network::last_error_code = 2;
+		this->Throw(new nothingness::nothingness_exception("cannot bind socket to the address!"));
+		return;
 	}
 
 #ifdef WIN32
@@ -139,8 +137,7 @@ void nothingness::network::TCP_Socket::_connect(const char* ip, uint16_t port, u
 	if (connect(sock, (struct sockaddr*)&addr, sizeof(addr)) < 0)
 #endif
 	{
-		nothingness::network::last_error = "failed connection to the server";
-		nothingness::network::last_error_code = 2;
+		this->Throw(new nothingness::nothingness_exception("failed connection to the server!"));
 	}
 }
 
@@ -164,10 +161,9 @@ nothingness::network::Socket* nothingness::network::TCP_Socket::_accept(){
 	if (tmp_sock < 0)
 #endif 
 	{
-		nothingness::network::last_error = "failed to accept the connection!";
-		nothingness::network::last_error_code = 3;
+		this->Throw(new nothingness::nothingness_exception("failed to accept the connection!"));
+		return nullptr;
 	}
-	
 
 	return new nothingness::network::TCP_Socket(tmp_sock);
 }
@@ -188,8 +184,7 @@ void nothingness::network::TCP_Socket::create_socket(){
 	if(sock < 0)
 #endif 
 	{
-		nothingness::network::last_error = "cannot initialize socket!";
-		nothingness::network::last_error_code = 101;
+		this->Throw(new nothingness::nothingness_exception("cannot initialize socket!"));
 	}
 }
 

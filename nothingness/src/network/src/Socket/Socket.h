@@ -2,6 +2,8 @@
 #define _NOTHINGNESS_SOCKET_H
 #include"..//..//network.h"
 
+#include "..//..//..//error_handler/error_handler.h"
+
 #define NOTHINGNESS_SOCKET_INPUT_DATA_USE_IP_PORT 0
 #define NOTHINGNESS_SOCKET_INPUT_DATA_USE_DOMAIN_PORT 1
 #define NOTHINGNESS_SOCKET_INPUT_DATA_USE_DOMAIN 2
@@ -9,7 +11,7 @@
 
 namespace nothingness {
 	namespace network {
-		class Socket {
+		class Socket : public nothingness::error_handler {
 		protected:
 
 			n_socket sock;

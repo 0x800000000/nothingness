@@ -1,36 +1,40 @@
 #include "luaScriptEngine.h"
-#include <lua.hpp>
-#include <LuaBridge/LuaBridge.h>
-#include "..//nothingness/nothingness.h"
 #include "..//logger/logger.h"
 
-bool nothingness::luaScriptEngine::_execute_script(const char* path, lua_State& lua){
+bool nothingness::LuaScript::_execute_script(const char* path, lua_State& lua){
 
 	if (luaL_loadfile(&lua, path) || lua_pcall(&lua, 0, 0, 0)) {
-		nothingness::Logger* logger = nothingness::Nothingness::getLastInstance()->getLogger();
 		
-		*logger << "error cannot execute script: \"" << path << "\" !\n";
-		logger->add_log(nothingness::Logger::log_type::LT_error);
+		std::string error_string = "cannot execute script: ";
+		error_string += path;
+		Throw(new nothingness::nothingness_file_load_exception(error_string.c_str(), path));
+		error_string.clear();
 
 		return false;
 	}
 
-	return false;
+	return true;
 }
 
-nothingness::luaScriptEngine::luaScriptEngine(){
+nothingness::LuaScript::LuaScript(){
 	lua = luaL_newstate();
 }
 
-bool nothingness::luaScriptEngine::execute_script(const char* path){
+nothingness::LuaScript::LuaScript(const char* path) : path(path){}
+
+bool nothingness::LuaScript::execute_script(const char* path){
 	luaL_openlibs(lua);
 	return this->_execute_script(path, *(lua));
 }
 
-bool nothingness::luaScriptEngine::execute_script(const char* path, std::function<void(lua_State&)> init){
+bool nothingness::LuaScript::execute_script(const char* path, std::function<void(lua_State&)> init){
 	luaL_openlibs(lua);
 
 	init(*(lua));
 
 	return this->_execute_script(path, *(lua));;
+}
+
+luabridge::LuaRef nothingness::LuaScript::get_function(const char* name){
+	return luabridge::getGlobal(lua, name);
 }

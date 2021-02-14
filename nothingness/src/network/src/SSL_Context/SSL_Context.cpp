@@ -8,11 +8,11 @@ nothingness::network::SSL::Context::Context() {
 
 bool nothingness::network::SSL::Context::use_certificate_file(const char* ceritficate_file, uint16_t ssl_file_type){
 	if (wolfSSL_CTX_use_certificate_file(ctx, ceritficate_file, ssl_file_type) != SSL_SUCCESS) {
-		nothingness::network::last_error = "failed to load: \"";
-		nothingness::network::last_error += ceritficate_file;
-		nothingness::network::last_error += "\", please check the file.";
+		std::string error = "failed to load: \"";
+		error += ceritficate_file;
+		error += "\", please check the file.";
 		
-		nothingness::network::last_error_code = 54;
+		this->Throw(new nothingness::nothingness_exception(error));
 		return false;
 	}
 	
@@ -21,23 +21,24 @@ bool nothingness::network::SSL::Context::use_certificate_file(const char* ceritf
 
 bool nothingness::network::SSL::Context::use_PrivateKey_file(const char* PrivateKey_file, uint16_t ssl_file_type){
 	if (wolfSSL_CTX_use_PrivateKey_file(ctx, PrivateKey_file, ssl_file_type) != SSL_SUCCESS) {
-		nothingness::network::last_error = "failed to load: \"";
-		nothingness::network::last_error += PrivateKey_file;
-		nothingness::network::last_error += "\", please check the file.";
+		std::string error = "failed to load: \"";
+		error += PrivateKey_file;
+		error += "\", please check the file.";
 
-		nothingness::network::last_error_code = 55;
+		this->Throw(new nothingness::nothingness_exception(error));
 		return false;
 	}
 
 	return true;
 }
 
-bool nothingness::network::SSL::Context::load_verify_locations(const char* certificate_file, const char* _file){
-	int ret = wolfSSL_CTX_load_verify_locations(ctx, certificate_file, _file);
+bool nothingness::network::SSL::Context::load_verify_locations(const char* certificate_file, const char* private_key_file){
+	int ret = wolfSSL_CTX_load_verify_locations(ctx, certificate_file, private_key_file);
 	if (ret != SSL_SUCCESS) {
-		nothingness::network::last_error = "failed to load: \"";
-		nothingness::network::last_error += certificate_file;
-		nothingness::network::last_error += "\", please check the file.";
+		std::string error = "failed to load: \"";
+		error += certificate_file;
+		error += "\", please check the file.";
+		this->Throw(new nothingness::nothingness_exception(error));
 		return false;
 	}
 

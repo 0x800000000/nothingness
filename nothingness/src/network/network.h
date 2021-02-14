@@ -3,7 +3,10 @@
 
 #include<cstdint>
 
+
+
 #ifdef WIN32
+#define NOTHINGNESS_WSA_STARTUP_FAILED 0x1
 #include<winsock2.h>
 typedef SOCKET n_socket;
 #else
@@ -28,7 +31,7 @@ namespace nothingness {
 
 		class Socket;
 
-		bool initalize_network();
+		int initalize_network();
 		void shutdown_network();
 
 		nothingness::network::SSL::Context* create_SSL_server_context();
@@ -39,10 +42,6 @@ namespace nothingness {
 
 		Socket* create_tcp_socket();
 		Socket* create_ssl_socket(nothingness::network::SSL::Context* ctx);
-
-		// if last_error_code > 0 we have an error!
-		extern uint8_t last_error_code;
-		extern std::string last_error;
 
 	}
 }

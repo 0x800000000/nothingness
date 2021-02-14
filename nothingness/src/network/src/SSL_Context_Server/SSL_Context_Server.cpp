@@ -6,8 +6,7 @@ nothingness::network::SSL::Context_Server::Context_Server(){
 	ctx = wolfSSL_CTX_new(wolfTLSv1_2_server_method());
 
 	if (ctx == NULL) {
-		nothingness::network::last_error = "failed to create WOLFSSL_CTX!";
-		nothingness::network::last_error_code = 44;
+		this->Throw(new nothingness::nothingness_exception("failed to create WOLFSSL_CTX for server!"));
 		return;
 	}
 }

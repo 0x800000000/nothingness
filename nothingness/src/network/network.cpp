@@ -7,10 +7,7 @@
 
 #include<wolfssl/ssl.h>
 
-std::string nothingness::network::last_error = "";
-uint8_t nothingness::network::last_error_code = 0;
-
-bool nothingness::network::initalize_network(){
+int nothingness::network::initalize_network(){
 #ifdef WIN32
 	int iResult;
 
@@ -18,13 +15,12 @@ bool nothingness::network::initalize_network(){
 
 	iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
 	if (iResult != 0) {
-		nothingness::network::last_error = "WSAStartup failed!";
-		nothingness::network::last_error_code = iResult;
+		return NOTHINGNESS_WSA_STARTUP_FAILED;
 	}
 
 #endif // WIN32
 
-	return false;
+	return 0;
 }
 
 void nothingness::network::shutdown_network(){

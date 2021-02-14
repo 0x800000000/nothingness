@@ -2,13 +2,14 @@
 #define _NOTHINGNESS_SSL_CONTEXT_H
 
 #include <cstdint>
+#include "..//..//..//error_handler/error_handler.h"
 
 struct WOLFSSL_CTX;
 
 namespace nothingness {
 	namespace network {
 		namespace SSL {
-			class Context {
+			class Context : public nothingness::error_handler {
 			protected:
 
 				WOLFSSL_CTX* ctx;

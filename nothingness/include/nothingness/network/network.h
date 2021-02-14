@@ -1,6 +1,8 @@
 #ifndef NOTHINGNESS_NETWORK_H
 #define NOTHINGNESS_NETWORK_H
 
+#include<nothingness/error_handler.h>
+
 #define NOTHINGNESS_SOCKET_INPUT_DATA_USE_IP_PORT 0
 #define NOTHINGNESS_SOCKET_INPUT_DATA_USE_DOMAIN_PORT 1
 #define NOTHINGNESS_SOCKET_INPUT_DATA_USE_DOMAIN 2
@@ -28,7 +30,7 @@ struct WOLFSSL;
 
 namespace nothingness {
 	namespace network {
-		class Socket {
+		class Socket : public nothingness::error_handler {
 		protected:
 
 			n_socket sock;
@@ -59,7 +61,7 @@ namespace nothingness {
 		};
 
 		namespace SSL {
-			class Context {
+			class Context : public nothingness::error_handler {
 			protected:
 
 				WOLFSSL_CTX* ctx;
@@ -89,17 +91,17 @@ namespace nothingness {
 				SSL_Socket();
 				SSL_Socket(Context* ctx, WOLFSSL* ssl, n_socket sock);
 
-				void _listen(const char* ip, uint16_t port, uint8_t input_data) ;
-				void _connect(const char* ip, uint16_t port, uint8_t input_data) ;
+				void _listen(const char* ip, uint16_t port, uint8_t input_data);
+				void _connect(const char* ip, uint16_t port, uint8_t input_data);
 
-				Socket* _accept() ;
+				Socket* _accept();
 
-				int write(const char* data, int len) ;
-				int read(char* data, int len) ;
+				int write(const char* data, int len);
+				int read(char* data, int len);
 
-				void create_socket() ;
+				void create_socket();
 
-				void _close()  ;
+				void _close();
 
 				~SSL_Socket();
 
@@ -121,7 +123,7 @@ namespace nothingness {
 
 		}
 
-		bool initalize_network();
+		int initalize_network();
 		void shutdown_network();
 
 		nothingness::network::SSL::Context* create_SSL_server_context();
@@ -132,10 +134,6 @@ namespace nothingness {
 
 		Socket* create_tcp_socket();
 		Socket* create_ssl_socket(nothingness::network::SSL::Context* ctx);
-
-		// if last_error_code > 0 we have an error!
-		extern uint8_t last_error_code;
-		extern std::string last_error;
 
 
 		class TCP_Socket : public Socket {
@@ -164,5 +162,4 @@ namespace nothingness {
 
 	}
 }
-
-#endif 
+#endif
